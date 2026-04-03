@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #080c14;
+  --surface: #0e1420;
+  --surface-hover: #141c2e;
+  --border: rgba(255,255,255,0.08);
+  --text: #f0f4ff;
+  --text-muted: rgba(240,244,255,0.45);
+  --accent: #7c3aed;
+  --dirge-accent: #dc2626;
+  --dirge-accent-hover: #b91c1c;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist, system-ui, sans-serif);
+}
+
+* {
+  box-sizing: border-box;
+}

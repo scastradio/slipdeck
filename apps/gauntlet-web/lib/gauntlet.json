@@ -1,0 +1,1534 @@
+{
+  "address": "8PSSP4AxGti8bo5ou2Pe56Pkv79q7quGcJFJ9e5AaJwk",
+  "metadata": {
+    "name": "gauntlet",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "admin_drain_game",
+      "docs": [
+        "Mutable-game admin: stop the game and take funds."
+      ],
+      "discriminator": [
+        216,
+        115,
+        107,
+        22,
+        147,
+        195,
+        189,
+        204
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "GameAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_prize",
+      "docs": [
+        "Manual claim: winner pulls their prize themselves."
+      ],
+      "discriminator": [
+        157,
+        233,
+        139,
+        121,
+        246,
+        62,
+        234,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "player_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "GameAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "winner_token_account",
+          "writable": true
+        },
+        {
+          "name": "winner",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "collect_admin_profit",
+      "docs": [
+        "Admin collects their profit share after game ends."
+      ],
+      "discriminator": [
+        164,
+        2,
+        80,
+        102,
+        60,
+        14,
+        200,
+        130
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "GameAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "admin_token_account",
+          "writable": true
+        },
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_game",
+      "docs": [
+        "Admin creates a new game."
+      ],
+      "discriminator": [
+        124,
+        69,
+        75,
+        66,
+        184,
+        220,
+        72,
+        206
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "protocol_config.total_games",
+                "account": "ProtocolConfig"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": {
+              "name": "CreateGameParams"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "eliminate_player",
+      "docs": [
+        "Admin eliminates a player — picks death message from theme pool."
+      ],
+      "discriminator": [
+        145,
+        79,
+        13,
+        176,
+        212,
+        209,
+        32,
+        145
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "player_account",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "death_msg_index",
+          "type": "u8"
+        },
+        {
+          "name": "custom_message",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "enter_game",
+      "docs": [
+        "Player enters the game — pays entry fee, creates player PDA."
+      ],
+      "discriminator": [
+        157,
+        184,
+        173,
+        203,
+        193,
+        117,
+        106,
+        66
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "player_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  97,
+                  121,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game"
+              },
+              {
+                "kind": "account",
+                "path": "player"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "GameAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "player_token_account",
+          "writable": true
+        },
+        {
+          "name": "treasury_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "player",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "entry_number",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "force_close_game",
+      "docs": [
+        "Super-admin: force-close any game early."
+      ],
+      "discriminator": [
+        233,
+        1,
+        228,
+        66,
+        62,
+        216,
+        240,
+        172
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_protocol",
+      "docs": [
+        "One-time initialisation by super-admin (deployer)."
+      ],
+      "discriminator": [
+        188,
+        233,
+        252,
+        106,
+        134,
+        146,
+        202,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "pay_winner",
+      "docs": [
+        "Auto-pay: admin triggers prize payout to a winner."
+      ],
+      "discriminator": [
+        95,
+        54,
+        215,
+        39,
+        87,
+        139,
+        215,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "player_account",
+          "writable": true
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "game.game_id",
+                "account": "GameAccount"
+              }
+            ]
+          }
+        },
+        {
+          "name": "winner_token_account",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_admin",
+      "docs": [
+        "Super-admin: grant or revoke admin status."
+      ],
+      "discriminator": [
+        251,
+        163,
+        0,
+        52,
+        91,
+        194,
+        187,
+        92
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "super_admin",
+          "signer": true,
+          "relations": [
+            "protocol_config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "target",
+          "type": "pubkey"
+        },
+        {
+          "name": "is_admin",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_game_mutable",
+      "docs": [
+        "Super-admin only: toggle mutable/immutable after creation."
+      ],
+      "discriminator": [
+        79,
+        130,
+        107,
+        208,
+        156,
+        115,
+        229,
+        248
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "mutable",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "set_winner_rank",
+      "docs": [
+        "Admin marks final ranks for winners (top N alive players get ranks 1..N)."
+      ],
+      "discriminator": [
+        122,
+        48,
+        210,
+        12,
+        60,
+        19,
+        193,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "player_account",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": [
+        {
+          "name": "rank",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "start_game",
+      "docs": [
+        "Admin starts the game (only if mutable or super-admin)."
+      ],
+      "discriminator": [
+        249,
+        47,
+        252,
+        172,
+        184,
+        162,
+        245,
+        14
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "game",
+          "writable": true
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_protocol",
+      "docs": [
+        "Super-admin: update treasury / fee."
+      ],
+      "discriminator": [
+        206,
+        25,
+        218,
+        114,
+        109,
+        41,
+        74,
+        173
+      ],
+      "accounts": [
+        {
+          "name": "protocol_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  97,
+                  117,
+                  110,
+                  116,
+                  108,
+                  101,
+                  116,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "super_admin",
+          "signer": true,
+          "relations": [
+            "protocol_config"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "new_treasury",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "new_fee_bps",
+          "type": {
+            "option": "u64"
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "GameAccount",
+      "discriminator": [
+        168,
+        26,
+        58,
+        96,
+        13,
+        208,
+        230,
+        188
+      ]
+    },
+    {
+      "name": "PlayerAccount",
+      "discriminator": [
+        224,
+        184,
+        224,
+        50,
+        98,
+        72,
+        48,
+        236
+      ]
+    },
+    {
+      "name": "ProtocolConfig",
+      "discriminator": [
+        207,
+        91,
+        250,
+        28,
+        152,
+        179,
+        215,
+        209
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6001,
+      "name": "GameFull",
+      "msg": "Game is full"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidGameStatus",
+      "msg": "Invalid game status for this action"
+    },
+    {
+      "code": 6003,
+      "name": "GameAlreadyEnded",
+      "msg": "Game has already ended"
+    },
+    {
+      "code": 6004,
+      "name": "GameNotEnded",
+      "msg": "Game has not ended yet"
+    },
+    {
+      "code": 6005,
+      "name": "NotEnoughPlayers",
+      "msg": "Not enough players to start"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidWinnerCount",
+      "msg": "Invalid winner count"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidSplits",
+      "msg": "Winner splits must not exceed 100%"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidEntryFee",
+      "msg": "Entry fee must be > 0"
+    },
+    {
+      "code": 6009,
+      "name": "PlayerNotInGame",
+      "msg": "Player is not in this game"
+    },
+    {
+      "code": 6010,
+      "name": "PlayerAlreadyEliminated",
+      "msg": "Player has already been eliminated"
+    },
+    {
+      "code": 6011,
+      "name": "AlreadyClaimed",
+      "msg": "Player has already claimed"
+    },
+    {
+      "code": 6012,
+      "name": "RankNotSet",
+      "msg": "Rank has not been set for this player"
+    },
+    {
+      "code": 6013,
+      "name": "NotAWinner",
+      "msg": "Player is not a winner"
+    },
+    {
+      "code": 6014,
+      "name": "GameIsImmutable",
+      "msg": "Game is immutable"
+    },
+    {
+      "code": 6015,
+      "name": "ManualClaimRequired",
+      "msg": "Auto-pay is enabled; use pay_winner instead"
+    },
+    {
+      "code": 6016,
+      "name": "AutoPayEnabled",
+      "msg": "Manual claim required; auto-pay is disabled"
+    },
+    {
+      "code": 6017,
+      "name": "NameTooLong",
+      "msg": "Name exceeds maximum length"
+    },
+    {
+      "code": 6018,
+      "name": "TooManyDeathMessages",
+      "msg": "Too many death messages"
+    },
+    {
+      "code": 6019,
+      "name": "TooManyAdmins",
+      "msg": "Too many admins"
+    },
+    {
+      "code": 6020,
+      "name": "FeeTooHigh",
+      "msg": "Protocol fee cannot exceed 10%"
+    }
+  ],
+  "types": [
+    {
+      "name": "CreateGameParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          },
+          {
+            "name": "death_messages",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "entry_fee",
+            "type": "u64"
+          },
+          {
+            "name": "winner_splits",
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "max_players",
+            "type": "u32"
+          },
+          {
+            "name": "mutable",
+            "type": "bool"
+          },
+          {
+            "name": "auto_pay",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "FeedEventKind"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FeedEventKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "GameStart"
+          },
+          {
+            "name": "Elimination"
+          },
+          {
+            "name": "GameEnd"
+          },
+          {
+            "name": "Payout"
+          },
+          {
+            "name": "SystemMessage"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game_id",
+            "type": "u64"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "theme",
+            "type": "string"
+          },
+          {
+            "name": "death_messages",
+            "type": {
+              "vec": "string"
+            }
+          },
+          {
+            "name": "entry_fee",
+            "type": "u64"
+          },
+          {
+            "name": "winner_splits",
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "admin_profit_bps",
+            "type": "u64"
+          },
+          {
+            "name": "max_players",
+            "type": "u32"
+          },
+          {
+            "name": "mutable",
+            "type": "bool"
+          },
+          {
+            "name": "auto_pay",
+            "type": "bool"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "GameStatus"
+              }
+            }
+          },
+          {
+            "name": "player_count",
+            "type": "u32"
+          },
+          {
+            "name": "eliminated_count",
+            "type": "u32"
+          },
+          {
+            "name": "total_pot",
+            "type": "u64"
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "started_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "ended_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "feed",
+            "type": {
+              "vec": {
+                "defined": {
+                  "name": "FeedEvent"
+                }
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "GameStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Ended"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PlayerAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "game",
+            "type": "pubkey"
+          },
+          {
+            "name": "player",
+            "type": "pubkey"
+          },
+          {
+            "name": "entry_number",
+            "type": "u32"
+          },
+          {
+            "name": "alive",
+            "type": "bool"
+          },
+          {
+            "name": "claimed",
+            "type": "bool"
+          },
+          {
+            "name": "entered_at",
+            "type": "i64"
+          },
+          {
+            "name": "eliminated_at",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "death_message",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "final_rank",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProtocolConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "super_admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "protocol_fee_bps",
+            "type": "u64"
+          },
+          {
+            "name": "total_games",
+            "type": "u64"
+          },
+          {
+            "name": "admins",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}

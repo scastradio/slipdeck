@@ -37,6 +37,18 @@ const PRODUCTS = [
     badge: "bg-amber-500/10 text-amber-400",
     status: "live",
   },
+  {
+    emoji: "⚔️",
+    name: "dirge",
+    tagline: "Last one standing elimination games",
+    description: "Admin creates a game, players pay entry, one gets eliminated on a timer. Last N standing split the prize pool — everyone dies, someone wins.",
+    url: "https://dirge-web.vercel.app",
+    accent: "text-red-400",
+    border: "hover:border-red-500/40",
+    bg: "hover:bg-red-500/5",
+    badge: "bg-red-500/10 text-red-400",
+    status: "live",
+  },
 ];
 
 export default function Home() {
@@ -67,7 +79,7 @@ export default function Home() {
 
       {/* Products */}
       <div className="max-w-5xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {PRODUCTS.map((p) => (
             <div key={p.name}
               className={`relative bg-[#0e1420] border border-white/8 ${p.border} ${p.bg} rounded-2xl p-6 transition group flex flex-col`}>
@@ -115,6 +127,7 @@ export default function Home() {
             <a href="https://github.com/scastradio/slyce" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">slyce</a>
             <a href="https://github.com/scastradio/ante" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">ante</a>
             <a href="https://github.com/scastradio/slipdeck" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">slipdeck</a>
+            <a href="https://github.com/scastradio/dirge" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">dirge</a>
           </div>
         </div>
       </div>
