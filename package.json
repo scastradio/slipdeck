@@ -1,0 +1,14 @@
+{
+  "name": "slipdeck",
+  "private": true,
+  "version": "0.0.1",
+  "description": "UI monorepo — slyce · ante · drop",
+  "scripts": {
+    "dev:slyce": "pnpm --filter slyce-web dev",
+    "dev:ante": "pnpm --filter ante-web dev",
+    "dev:admin": "pnpm --filter slyce-admin dev",
+    "build:all": "pnpm --filter './apps/*' build",
+    "lint:all": "pnpm --filter './apps/*' lint"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
