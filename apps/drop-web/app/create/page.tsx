@@ -5,8 +5,8 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { PublicKey } from "@solana/web3.js";
 import Link from "next/link";
-import { SUPPORTED_TOKENS, PROTOCOL_FEE_LAMPORTS_PER_WALLET } from "@/lib/constants";
-import { createAirdrop, fundAirdrop, getProtocolConfigPDA } from "@/lib/program";
+import { KNOWN_TOKENS, PROTOCOL_FEE_LAMPORTS_PER_WALLET, BATCH_SIZE } from "@/lib/constants";
+import { createAirdrop, fundAirdrop, fetchMintInfo, getProtocolConfigPDA } from "@/lib/program";
 
 interface ParsedRecipient {
   wallet: string;
@@ -63,7 +63,10 @@ export default function CreatePage() {
 
   // Step 2
   const [name, setName] = useState("");
-  const [selectedToken, setSelectedToken] = useState(SUPPORTED_TOKENS[0]);
+  const [mintAddress, setMintAddress] = useState("");
+  const [mintInfo, setMintInfo] = useState<{ symbol: string; decimals: number } | null>(null);
+  const [mintLoading, setMintLoading] = useState(false);
+  const [mintError, setMintError] = useState("");
   const [totalAmount, setTotalAmount] = useState("");
   const [mode, setMode] = useState<"push" | "claim">("push");
 
@@ -72,6 +75,50 @@ export default function CreatePage() {
   const [error, setError] = useState("");
   const [successAddress, setSuccessAddress] = useState("");
   const [txStep, setTxStep] = useState("");
+
+  const handleMintAddressChange = useCallback(async (val: string) => {
+    setMintAddress(val);
+    setMintError("");
+    setMintInfo(null);
+    if (val.length < 32) return;
+    // Check known tokens first
+    const known = KNOWN_TOKENS.find(t => t.mint === val);
+    if (known) {
+      setMintInfo({ symbol: known.symbol, decimals: known.decimals });
+      return;
+    }
+    setMintLoading(true);
+    try {
+      const info = await fetchMintInfo(connection, val);
+      if (!info) {
+        setMintError("Not a valid SPL mint address");
+      } else {
+        setMintInfo({ symbol: "Unknown", decimals: info.decimals });
+      }
+    } catch {
+      setMintError("Failed to fetch token info");
+    } finally {
+      setMintLoading(false);
+    }
+  }, [connection]);
+
+  const handleMintSelect = useCallback(async (mint: string) => {
+    setMintAddress(mint);
+    setMintError("");
+    setMintInfo(null);
+    const known = KNOWN_TOKENS.find(t => t.mint === mint);
+    if (known) {
+      setMintInfo({ symbol: known.symbol, decimals: known.decimals });
+      return;
+    }
+    setMintLoading(true);
+    try {
+      const info = await fetchMintInfo(connection, mint);
+      if (info) setMintInfo({ symbol: "Unknown", decimals: info.decimals });
+    } finally {
+      setMintLoading(false);
+    }
+  }, [connection]);
 
   const handleParse = useCallback(() => {
     const detected = detectHasAmounts(rawInput);
@@ -94,17 +141,20 @@ export default function CreatePage() {
 
   const validRecipients = recipients.filter((r) => r.valid);
   const invalidCount = recipients.filter((r) => !r.valid).length;
+  const validCount = validRecipients.length;
+
+  const decimals = mintInfo?.decimals ?? 6;
 
   const computedRecipients = useCallback(() => {
     if (!hasAmounts && totalAmount) {
       const amt = parseFloat(totalAmount);
       if (amt > 0 && validRecipients.length > 0) {
-        const perWallet = (amt / validRecipients.length).toFixed(selectedToken.decimals);
+        const perWallet = (amt / validRecipients.length).toFixed(decimals);
         return validRecipients.map((r) => ({ ...r, amount: perWallet }));
       }
     }
     return validRecipients;
-  }, [hasAmounts, totalAmount, validRecipients, selectedToken.decimals]);
+  }, [hasAmounts, totalAmount, validRecipients, decimals]);
 
   const finalRecipients = computedRecipients();
   const totalTokens = finalRecipients.reduce((sum, r) => sum + parseFloat(r.amount || "0"), 0);
@@ -115,6 +165,8 @@ export default function CreatePage() {
   const canProceedStep1 = parsed && validRecipients.length > 0;
   const canProceedStep2 =
     name.trim().length > 0 &&
+    mintAddress.length > 0 &&
+    mintInfo !== null &&
     (hasAmounts ? true : parseFloat(totalAmount) > 0) &&
     finalRecipients.every((r) => parseFloat(r.amount) > 0);
 
@@ -133,10 +185,13 @@ export default function CreatePage() {
       setError("Connect your wallet first");
       return;
     }
+    if (!mintInfo) {
+      setError("Please select a valid token");
+      return;
+    }
 
     setLoading(true);
     setError("");
-    setTxStep("Creating airdrop account...");
 
     try {
       // Fetch protocol config to get treasury
@@ -156,32 +211,72 @@ export default function CreatePage() {
         return;
       }
 
-      const seed = Array.from(crypto.getRandomValues(new Uint8Array(8)));
+      const tokenDecimals = mintInfo.decimals;
+      const amountPerWallet = hasAmounts
+        ? null
+        : (parseFloat(totalAmount) * Math.pow(10, tokenDecimals)) / finalRecipients.length;
 
-      setTxStep("Step 1/2: Creating airdrop on-chain...");
-      const airdropAddress = await createAirdrop(connection, wallet, wallet.publicKey, {
-        name: name.trim(),
-        mode,
-        mint: selectedToken.mint,
-        recipients: finalRecipients.map((r) => ({
+      // Split into batches of BATCH_SIZE
+      const batches: ParsedRecipient[][] = [];
+      for (let i = 0; i < finalRecipients.length; i += BATCH_SIZE) {
+        batches.push(finalRecipients.slice(i, i + BATCH_SIZE));
+      }
+
+      const createdDrops: string[] = [];
+
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        setTxStep(
+          batches.length > 1
+            ? `Batch ${i + 1}/${batches.length}: creating airdrop...`
+            : "Step 1/2: Creating airdrop on-chain..."
+        );
+
+        const seed = Array.from(crypto.getRandomValues(new Uint8Array(8)));
+
+        const recipientParams = batch.map((r) => ({
           wallet: r.wallet,
-          amount: BigInt(Math.round(parseFloat(r.amount) * 10 ** selectedToken.decimals)),
-        })),
-        seed,
-      });
+          amount: BigInt(
+            hasAmounts
+              ? Math.floor(parseFloat(r.amount) * Math.pow(10, tokenDecimals))
+              : Math.floor(amountPerWallet!)
+          ),
+        }));
 
-      setTxStep("Step 2/2: Funding vault...");
-      await fundAirdrop(
-        connection,
-        wallet,
-        wallet.publicKey,
-        airdropAddress,
-        selectedToken.mint,
-        treasuryAddress
-      );
+        const batchName = batches.length > 1 ? `${name.trim()} (${i + 1}/${batches.length})` : name.trim();
 
-      setSuccessAddress(airdropAddress);
-      setTxStep("");
+        const airdropAddress = await createAirdrop(connection, wallet, wallet.publicKey, {
+          name: batchName,
+          mode,
+          mint: mintAddress,
+          recipients: recipientParams,
+          seed,
+        });
+
+        setTxStep(
+          batches.length > 1
+            ? `Batch ${i + 1}/${batches.length}: funding vault...`
+            : "Step 2/2: Funding vault..."
+        );
+
+        await fundAirdrop(
+          connection,
+          wallet,
+          wallet.publicKey,
+          airdropAddress,
+          mintAddress,
+          treasuryAddress
+        );
+
+        createdDrops.push(airdropAddress);
+      }
+
+      setSuccessAddress(createdDrops[0]);
+      if (createdDrops.length > 1) {
+        setTxStep(`✅ ${createdDrops.length} drops created successfully!`);
+      } else {
+        setTxStep("");
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       setError(msg);
@@ -204,6 +299,9 @@ export default function CreatePage() {
             style={{ background: "#0d1117", borderColor: "#1e293b", color: "#0ea5e9" }}>
             {successAddress}
           </div>
+          {txStep && (
+            <p className="text-emerald-400 text-sm mb-4">{txStep}</p>
+          )}
           <div className="flex gap-3 justify-center">
             <Link
               href={`/drops/${successAddress}`}
@@ -220,7 +318,10 @@ export default function CreatePage() {
                 setRecipients([]);
                 setParsed(false);
                 setName("");
+                setMintAddress("");
+                setMintInfo(null);
                 setTotalAmount("");
+                setTxStep("");
               }}
               className="px-6 py-2.5 rounded-lg font-semibold text-slate-300 border border-slate-700 hover:border-slate-500"
             >
@@ -287,7 +388,7 @@ export default function CreatePage() {
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Upload recipients</h2>
               <p className="text-slate-400 text-sm">
-                Paste wallet addresses (one per line) or CSV with amounts (wallet,amount).
+                Paste wallet addresses (one per line) or CSV with amounts (wallet,amount). No wallet limit — auto-batched into groups of {BATCH_SIZE}.
               </p>
             </div>
 
@@ -340,6 +441,17 @@ export default function CreatePage() {
                 </div>
               )}
             </div>
+
+            {/* Auto-batching notice */}
+            {parsed && validRecipients.length > BATCH_SIZE && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300">
+                <p className="font-semibold">📦 Auto-batching enabled</p>
+                <p className="text-amber-300/70 mt-1">
+                  {validRecipients.length.toLocaleString()} wallets → {Math.ceil(validRecipients.length / BATCH_SIZE)} drops of up to {BATCH_SIZE} each.
+                  All funded in sequence automatically.
+                </p>
+              </div>
+            )}
 
             {/* Preview table */}
             {parsed && recipients.length > 0 && (
@@ -427,25 +539,53 @@ export default function CreatePage() {
               </div>
 
               {/* Token selector */}
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Token</label>
-                <div className="flex gap-3">
-                  {SUPPORTED_TOKENS.map((token) => (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-slate-400">Token (any SPL mint)</label>
+
+                {/* Quick select well-known tokens */}
+                <div className="flex gap-2 flex-wrap">
+                  {KNOWN_TOKENS.map(t => (
                     <button
-                      key={token.symbol}
-                      onClick={() => setSelectedToken(token)}
-                      className="flex items-center gap-2 px-5 py-3 rounded-lg border font-semibold transition-all"
-                      style={{
-                        background: selectedToken.symbol === token.symbol ? "#0ea5e920" : "#0d1117",
-                        borderColor: selectedToken.symbol === token.symbol ? "#0ea5e9" : "#1e293b",
-                        color: selectedToken.symbol === token.symbol ? "#0ea5e9" : "#94a3b8",
-                      }}
+                      key={t.mint}
+                      onClick={() => handleMintSelect(t.mint)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono border transition ${
+                        mintAddress === t.mint
+                          ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                          : 'bg-white/5 border-white/10 text-white/50 hover:border-white/20'
+                      }`}
                     >
-                      {token.symbol}
+                      {t.symbol}
                     </button>
                   ))}
+                  <button
+                    onClick={() => { setMintAddress(""); setMintInfo(null); setMintError(""); }}
+                    className="px-3 py-1.5 rounded-lg text-xs border border-white/10 bg-white/5 text-white/40 hover:border-white/20 transition"
+                  >
+                    custom
+                  </button>
                 </div>
-                <p className="text-xs text-slate-600 mt-1 font-mono">{selectedToken.mint}</p>
+
+                {/* Mint address input */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={mintAddress}
+                    onChange={e => handleMintAddressChange(e.target.value)}
+                    placeholder="Paste any SPL token mint address..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-amber-500/50 font-mono"
+                  />
+                  {mintLoading && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 text-xs">loading...</div>
+                  )}
+                </div>
+
+                {mintError && <p className="text-red-400 text-xs">{mintError}</p>}
+
+                {mintInfo && (
+                  <div className="flex items-center gap-2 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                    ✓ {mintInfo.symbol || 'Unknown token'} — {mintInfo.decimals} decimals
+                  </div>
+                )}
               </div>
 
               {/* Amount (only if no amounts in CSV) */}
@@ -460,16 +600,16 @@ export default function CreatePage() {
                       value={totalAmount}
                       onChange={(e) => setTotalAmount(e.target.value)}
                       placeholder="e.g. 1000"
-                      className="w-full px-4 py-3 rounded-lg border text-white outline-none focus:border-sky-500 transition-colors pr-20"
+                      className="w-full px-4 py-3 rounded-lg border text-white outline-none focus:border-sky-500 transition-colors pr-24"
                       style={{ background: "#0d1117", borderColor: "#1e293b" }}
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm font-semibold">
-                      {selectedToken.symbol}
+                      {mintInfo?.symbol || "tokens"}
                     </span>
                   </div>
-                  {totalAmount && parseFloat(totalAmount) > 0 && validRecipients.length > 0 && (
+                  {totalAmount && parseFloat(totalAmount) > 0 && validRecipients.length > 0 && mintInfo && (
                     <p className="text-xs text-slate-500 mt-1">
-                      = {(parseFloat(totalAmount) / validRecipients.length).toFixed(selectedToken.decimals)} {selectedToken.symbol} per wallet
+                      = {(parseFloat(totalAmount) / validRecipients.length).toFixed(mintInfo.decimals)} {mintInfo.symbol} per wallet
                     </p>
                   )}
                 </div>
@@ -478,7 +618,7 @@ export default function CreatePage() {
                   <label className="block text-sm font-medium text-slate-400 mb-2">Total (from CSV)</label>
                   <div className="px-4 py-3 rounded-lg border text-slate-300 font-mono"
                     style={{ background: "#0d1117", borderColor: "#1e293b" }}>
-                    {validRecipients.reduce((s, r) => s + parseFloat(r.amount || "0"), 0).toFixed(selectedToken.decimals)} {selectedToken.symbol}
+                    {validRecipients.reduce((s, r) => s + parseFloat(r.amount || "0"), 0).toFixed(mintInfo?.decimals ?? 6)} {mintInfo?.symbol || "tokens"}
                   </div>
                 </div>
               )}
@@ -537,7 +677,7 @@ export default function CreatePage() {
             <div>
               <h2 className="text-2xl font-bold text-white mb-2">Preview & Fund</h2>
               <p className="text-slate-400 text-sm">
-                Review your airdrop before committing. Two transactions required.
+                Review your airdrop before committing.{validCount > BATCH_SIZE ? ` ${Math.ceil(validCount / BATCH_SIZE)} batches will be created.` : " Two transactions required."}
               </p>
             </div>
 
@@ -545,7 +685,7 @@ export default function CreatePage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: "Name", value: name },
-                { label: "Token", value: selectedToken.symbol },
+                { label: "Token", value: mintInfo?.symbol || mintAddress.slice(0, 8) + "..." },
                 { label: "Mode", value: mode === "push" ? "⚡ Push" : "✋ Claim" },
                 { label: "Recipients", value: finalRecipients.length.toString() },
               ].map(({ label, value }) => (
@@ -555,6 +695,17 @@ export default function CreatePage() {
                 </div>
               ))}
             </div>
+
+            {/* Auto-batching notice */}
+            {validCount > BATCH_SIZE && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm text-amber-300">
+                <p className="font-semibold">📦 Auto-batching enabled</p>
+                <p className="text-amber-300/70 mt-1">
+                  {validCount.toLocaleString()} wallets → {Math.ceil(validCount / BATCH_SIZE)} drops of up to {BATCH_SIZE} each.
+                  All funded in sequence automatically.
+                </p>
+              </div>
+            )}
 
             {/* Recipients table */}
             <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#1e293b" }}>
@@ -580,7 +731,7 @@ export default function CreatePage() {
                           {r.wallet.slice(0, 6)}...{r.wallet.slice(-4)}
                         </td>
                         <td className="px-4 py-2 text-right text-slate-200">
-                          {parseFloat(r.amount).toFixed(selectedToken.decimals === 6 ? 2 : 4)} {selectedToken.symbol}
+                          {parseFloat(r.amount).toFixed(decimals === 6 ? 2 : 4)} {mintInfo?.symbol || ""}
                         </td>
                         <td className="px-4 py-2 text-right">
                           <span className="text-xs px-2 py-0.5 rounded-full text-yellow-400 border border-yellow-400/20 bg-yellow-400/5">
@@ -600,13 +751,18 @@ export default function CreatePage() {
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">Total tokens</span>
                 <span className="text-white font-mono">
-                  {totalTokens.toFixed(selectedToken.decimals === 6 ? 2 : 4)} {selectedToken.symbol}
+                  {totalTokens.toFixed(decimals === 6 ? 2 : 4)} {mintInfo?.symbol || "tokens"}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-slate-400">Protocol fee (0.001 SOL × {finalRecipients.length})</span>
                 <span className="text-white font-mono">{protocolFeeSol.toFixed(3)} SOL</span>
               </div>
+              {validCount > BATCH_SIZE && (
+                <div className="text-xs text-amber-300/60 text-right">
+                  across {Math.ceil(validCount / BATCH_SIZE)} batches
+                </div>
+              )}
               {mode === "push" && (
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">ATA creation est. (~0.002 SOL × {finalRecipients.length})</span>

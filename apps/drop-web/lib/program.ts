@@ -258,6 +258,22 @@ export async function claimAirdrop(
   return tx;
 }
 
+export async function fetchMintInfo(
+  connection: Connection,
+  mintAddress: string
+): Promise<{ decimals: number; supply: string } | null> {
+  try {
+    const mint = new PublicKey(mintAddress);
+    const info = await connection.getParsedAccountInfo(mint);
+    if (!info.value) return null;
+    const data = (info.value.data as any).parsed?.info;
+    if (!data) return null;
+    return { decimals: data.decimals, supply: data.supply };
+  } catch {
+    return null;
+  }
+}
+
 export async function resetRecipient(
   connection: Connection,
   wallet: AnchorWallet,

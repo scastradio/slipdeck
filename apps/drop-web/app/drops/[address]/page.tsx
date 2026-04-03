@@ -5,15 +5,15 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 import { fetchAirdrop, fetchVaultBalance, executePush, claimAirdrop, resetRecipient, OnChainAirdrop } from "@/lib/program";
-import { SUPPORTED_TOKENS } from "@/lib/constants";
+import { KNOWN_TOKENS } from "@/lib/constants";
 
 function getTokenSymbol(mint: string): string {
-  const t = SUPPORTED_TOKENS.find((t) => t.mint === mint);
+  const t = KNOWN_TOKENS.find((t) => t.mint === mint);
   return t?.symbol ?? mint.slice(0, 8) + "...";
 }
 
 function getTokenDecimals(mint: string): number {
-  const t = SUPPORTED_TOKENS.find((t) => t.mint === mint);
+  const t = KNOWN_TOKENS.find((t) => t.mint === mint);
   return t?.decimals ?? 6;
 }
 

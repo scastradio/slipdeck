@@ -79,7 +79,7 @@ export default function Home() {
               {
                 step: "02",
                 title: "Fund vault",
-                desc: "Approve a single transaction to deposit tokens into the program vault. 0.001 SOL protocol fee per recipient.",
+                desc: "Approve transactions to deposit tokens. Large lists auto-batch into groups of 50. 0.001 SOL protocol fee per recipient.",
                 icon: "💸",
               },
               {
@@ -138,16 +138,16 @@ export default function Home() {
           style={{ background: "#0d1117", borderColor: "#1e293b" }}>
           <div className="grid grid-cols-3 gap-8">
             <div>
-              <div className="text-3xl font-bold" style={{ color: "#0ea5e9" }}>50</div>
-              <div className="text-slate-500 text-sm mt-1">Max wallets/drop</div>
+              <div className="text-3xl font-bold" style={{ color: "#0ea5e9" }}>∞</div>
+              <div className="text-slate-500 text-sm mt-1">No wallet limit — auto-batched</div>
             </div>
             <div>
               <div className="text-3xl font-bold" style={{ color: "#0ea5e9" }}>0.001</div>
               <div className="text-slate-500 text-sm mt-1">SOL per recipient</div>
             </div>
             <div>
-              <div className="text-3xl font-bold" style={{ color: "#0ea5e9" }}>2</div>
-              <div className="text-slate-500 text-sm mt-1">Tokens (USDC + USDT)</div>
+              <div className="text-3xl font-bold" style={{ color: "#0ea5e9" }}>Any</div>
+              <div className="text-slate-500 text-sm mt-1">SPL token supported</div>
             </div>
           </div>
         </div>
