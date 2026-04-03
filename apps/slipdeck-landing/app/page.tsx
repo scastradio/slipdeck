@@ -30,12 +30,12 @@ const PRODUCTS = [
     name: "drop",
     tagline: "Token airdrop infrastructure",
     description: "Upload a wallet list, get a fee estimate, confirm. The contract handles distribution — push it out or let recipients claim.",
-    url: null,
+    url: "https://drop-web-ruby.vercel.app",
     accent: "text-amber-400",
     border: "hover:border-amber-500/30",
     bg: "hover:bg-amber-500/5",
     badge: "bg-amber-500/10 text-amber-400",
-    status: "soon",
+    status: "live",
   },
 ];
 
