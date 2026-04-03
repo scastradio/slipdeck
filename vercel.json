@@ -1,0 +1,4 @@
+{
+  "version": 2,
+  "buildCommand": "echo 'select a specific app project to deploy'"
+}
