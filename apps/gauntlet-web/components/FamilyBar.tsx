@@ -7,7 +7,7 @@ export function FamilyBar() {
       <span className="opacity-30">·</span>
       <a href="https://drop-web-ruby.vercel.app" className="hover:text-amber-400 transition font-mono">📦 drop</a>
       <span className="opacity-30">·</span>
-      <a href="#" className="hover:text-red-400 transition font-mono text-red-400/70">⚔️ gauntlet</a>
+      <a href="https://gauntlet-web.vercel.app" className="hover:text-red-400 transition font-mono text-red-400/70">⚔️ gauntlet</a>
     </div>
   );
 }

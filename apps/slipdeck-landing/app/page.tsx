@@ -39,10 +39,10 @@ const PRODUCTS = [
   },
   {
     emoji: "⚔️",
-    name: "dirge",
-    tagline: "Last one standing elimination games",
-    description: "Admin creates a game, players pay entry, one gets eliminated on a timer. Last N standing split the prize pool — everyone dies, someone wins.",
-    url: "https://dirge-web.vercel.app",
+    name: "gauntlet",
+    tagline: "Last one standing battle royale",
+    description: "Admin creates a game, players pay entry, get eliminated one by one. Last N standing split the prize pool. Themed death messages, live on-chain feed.",
+    url: "https://gauntlet-web.vercel.app",
     accent: "text-red-400",
     border: "hover:border-red-500/40",
     bg: "hover:bg-red-500/5",
@@ -127,7 +127,7 @@ export default function Home() {
             <a href="https://github.com/scastradio/slyce" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">slyce</a>
             <a href="https://github.com/scastradio/ante" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">ante</a>
             <a href="https://github.com/scastradio/slipdeck" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">slipdeck</a>
-            <a href="https://github.com/scastradio/dirge" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">dirge</a>
+            <a href="https://github.com/scastradio/gauntlet" target="_blank" rel="noopener noreferrer" className="hover:text-white/50 transition">gauntlet</a>
           </div>
         </div>
       </div>
